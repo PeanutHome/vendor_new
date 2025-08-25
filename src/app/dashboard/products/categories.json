@@ -1,0 +1,223 @@
+{
+  "Fashion": {
+    "Tops": [
+      "Blouses & Shirts",
+      "T-Shirts & Tees",
+      "Tank Tops & Camis"
+    ],
+    "Bottoms": [
+      "Skirts",
+      "Trousers & Pants",
+      "Shorts"
+    ],
+    "Dresses": [
+      "Casual Dresses",
+      "Formal Dresses",
+      "Traditional Wear (Htamein, Longyi)"
+    ],
+    "Outerwear": [
+      "Jackets",
+      "Sweaters & Cardigans"
+    ],
+    "Women's Fashion": [
+      "Sleepwear & Loungewear",
+      "Hijabs & Scarves",
+      "Maternity Wear"
+    ],
+    "Undergarments": [
+      "Bras & Panties",
+      "Shapewear"
+    ],
+    "Men's Fashion": [
+      "T-Shirts & Polos",
+      "Shirts",
+      "Jackets & Hoodies",
+      "Ethnic & Traditional Wear",
+      "Sleepwear & Loungewear"
+    ],
+    "Pants": [
+      "Casual",
+      "Formal",
+      "Jeans",
+      "Longyi"
+    ],
+    "Innerwear": [
+      "Undergarments",
+      "Vests"
+    ],
+    "Kids & Baby Fashion": [
+      "Baby Clothing (0–24 months)",
+      "Boys' Clothing",
+      "Girls' Clothing",
+      "School Uniforms",
+      "Baby Shoes & Accessories"
+    ],
+    "Men's Footwear": [
+      "Casual Shoes",
+      "Formal Shoes",
+      "Sandals & Slippers"
+    ],
+    "Women's Footwear": [
+      "Flats & Sandals",
+      "Heels",
+      "Sneakers"
+    ],
+    "Footwear": [
+      "Kids' Footwear",
+      "Ethnic Footwear (e.g., Myanmar slippers)"
+    ]
+  },
+  "Beauty & Personal Care": {
+    "Makeup": [
+      "Face (Foundation, Powder, Blush)",
+      "Eyes (Mascara, Eyeliner, Eyeshadow)",
+      "Lips (Lipstick, Gloss, Balm)",
+      "Makeup Tools & Brushes"
+    ],
+    "Skincare": [
+      "Face Wash & Cleanser",
+      "Moisturizers & Creams",
+      "Serums & Treatments",
+      "Sunscreen",
+      "Face Masks & Sheets"
+    ],
+    "Hair Care": [
+      "Shampoo & Conditioner",
+      "Hair Oil & Serum",
+      "Hair Styling Tools (Straighteners, Curlers)",
+      "Hair Color"
+    ],
+    "Bath & Body": [
+      "Body Wash & Soap",
+      "Body Lotion",
+      "Deodorants",
+      "Scrubs & Exfoliants"
+    ],
+    "Personal Care": [
+      "Feminine Hygiene",
+      "Oral Care (Toothpaste, Mouthwash)",
+      "Shaving & Grooming",
+      "Nail Care"
+    ],
+    "Traditional & Herbal Care": [
+      "Thanaka Products",
+      "Herbal Soaps",
+      "Natural Oils"
+    ]
+  },
+  "Electronics": {
+    "Mobiles & Accessories": [
+      "Smartphones",
+      "Feature Phones",
+      "Power Banks",
+      "Chargers & Cables",
+      "Screen Protectors & Cases"
+    ],
+    "Computers & Laptops": [
+      "Laptops & Notebooks",
+      "Keyboards & Mice",
+      "External Storage",
+      "Monitors",
+      "Printers"
+    ],
+    "TV & Entertainment": [
+      "LED/LCD TVs",
+      "Smart TVs",
+      "TV Boxes",
+      "Speakers & Sound Systems"
+    ],
+    "Cameras & Drones": [
+      "DSLR & Mirrorless",
+      "Security Cameras",
+      "Webcams",
+      "Drones"
+    ],
+    "Smart Devices": [
+      "Smartwatches",
+      "Fitness Bands",
+      "Smart Home Devices"
+    ],
+    "Home Appliances": [
+      "Refrigerators",
+      "Washing Machines",
+      "Fans & Air Coolers",
+      "Rice Cookers",
+      "Blenders & Mixers"
+    ]
+  },
+  "Accessories": {
+    "Bags": [
+      "Handbags",
+      "Backpacks",
+      "Clutches & Wallets",
+      "Laptop Bags",
+      "Travel Bags & Trolleys"
+    ],
+    "Eyewear": [
+      "Sunglasses",
+      "Optical Frames",
+      "Reading Glasses"
+    ],
+    "Watches": [
+      "Analog Watches",
+      "Digital Watches",
+      "Smart Watches"
+    ],
+    "Jewelry": [
+      "Earrings",
+      "Necklaces",
+      "Bracelets",
+      "Rings",
+      "Traditional Jewelry"
+    ],
+    "Fashion Accessories": [
+      "Caps & Hats",
+      "Belts",
+      "Scarves & Shawls",
+      "Gloves",
+      "Hair Accessories"
+    ]
+  },
+  "Home and Kitchen": {
+    "Cookware": [
+      "Pots & Pans",
+      "Pressure Cookers",
+      "Woks"
+    ],
+    "Tableware": [
+      "Plates & Bowls",
+      "Glasses & Mugs",
+      "Cutlery"
+    ],
+    "Kitchen & Dining": [
+      "Storage & Containers",
+      "Water Filters"
+    ],
+    "Home Cleaning & Tools": [
+      "Brooms & Mops",
+      "Buckets & Dustpans",
+      "Cleaning Cloths",
+      "Trash Bins"
+    ],
+    "Furniture & Home Décor": [
+      "Sofas & Chairs",
+      "Tables & Desks",
+      "Beds & Mattresses",
+      "Shelves & Storage Units",
+      "Curtains & Carpets",
+      "Wall Art & Frames"
+    ],
+    "Home Improvement & Lighting": [
+      "Light Bulbs & Fixtures",
+      "Extension Cords",
+      "Tools & DIY Items",
+      "Bathroom Fittings"
+    ],
+    "Bedding": [
+      "Bedsheets",
+      "Pillows & Cushions",
+      "Blankets & Comforters",
+      "Mosquito Nets"
+    ]
+  }
+}
