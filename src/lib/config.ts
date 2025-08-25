@@ -1,5 +1,5 @@
 export const API_CONFIG = {
-  BASE_URL: 'https://ecommerce-2-cdft.onrender.com',
+  BASE_URL: '',
   ENDPOINTS: {
     LOGIN: '/auth/login',
     REFRESH: '/auth/refresh',
