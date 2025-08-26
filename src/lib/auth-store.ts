@@ -264,17 +264,27 @@ export const useAuthStore = create<AuthState>()(
 
         try {
           console.log('🔄 Attempting to refresh access token...');
+          console.log('🔑 Current token (first 20 chars):', state.accessToken.substring(0, 20) + '...');
           
+          // Send the expired token in the body instead of header
           const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.REFRESH}`, {
             method: 'POST',
             headers: {
-              'Authorization': `Bearer ${state.accessToken}`,
               'Content-Type': 'application/json',
             },
+            body: JSON.stringify({
+              accessToken: state.accessToken, // Send expired token in body
+            }),
           });
 
+          console.log('📥 Refresh response status:', response.status);
+          console.log('📥 Refresh response ok:', response.ok);
+
           if (!response.ok) {
+            const errorText = await response.text();
             console.log('❌ Token refresh failed with status:', response.status);
+            console.log('❌ Error response:', errorText);
+            
             // If refresh fails, log out the user
             get().logout();
             return false;
@@ -282,10 +292,11 @@ export const useAuthStore = create<AuthState>()(
 
           const refreshData = await response.json();
           console.log('✅ Token refreshed successfully');
+          console.log('🆕 New token (first 20 chars):', refreshData.accessToken?.substring(0, 20) + '...');
           
           // Update the access token
           set({ accessToken: refreshData.accessToken });
-          console.log('✅ New access token saved');
+          console.log('✅ New access token saved to store');
           
           return true;
         } catch (error) {
