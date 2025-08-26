@@ -1,8 +1,13 @@
 "use client";
 
 import { useState } from 'react';
-import { useAuthStore } from '../../lib/auth-store';
-import { API_CONFIG } from '../../lib/config';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuthStore } from '@/lib/auth-store';
+import { API_CONFIG } from '@/lib/config';
+import { apiCallWithRefresh } from '@/lib/utils';
 
 interface LoginDialogProps {
   isOpen: boolean;
@@ -42,7 +47,7 @@ export default function LoginDialog({ isOpen, onClose }: LoginDialogProps) {
         }
         
         // Call vendor API to get vendor details
-        const vendorResponse = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.VENDOR_BY_USER.replace('{userId}', userId)}`, {
+        const vendorResponse = await apiCallWithRefresh(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.VENDOR_BY_USER.replace('{userId}', userId)}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${accessToken}`,

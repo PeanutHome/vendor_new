@@ -11,6 +11,7 @@ import { API_CONFIG } from "@/lib/config";
 import { useAuthStore } from "@/lib/auth-store";
 
 
+
 export default function ProductsPage() {
   // Temporarily removed auth requirement for testing
   // const { user, accessToken } = useAuthStore();
@@ -32,13 +33,22 @@ export default function ProductsPage() {
   const [selectedRejectedProduct, setSelectedRejectedProduct] = useState<any>(null);
 
   
-  // Get auth token
-  const { accessToken, user } = useAuthStore();
+  // Get auth token and vendor ID
+  const { accessToken, vendorId, fetchVendorDetails } = useAuthStore();
+  
+  // Check if we're waiting for vendor ID
+  const isWaitingForVendor = !vendorId && accessToken;
 
                   // Fetch real products from API
     const fetchProducts = useCallback(async () => {
-     if (!accessToken || !user?.id) {
+     if (!accessToken) {
        console.log('⏳ Waiting for authentication...');
+       setLoading(false);
+       return;
+     }
+     
+     if (!vendorId) {
+       console.log('⏳ Waiting for vendor ID...');
        setLoading(false);
        return;
      }
@@ -47,7 +57,7 @@ export default function ProductsPage() {
        setLoading(true);
        setError(null);
        
-       const vendorId = user.id;
+       // Use dynamic vendor ID from auth store
        const apiUrl = `${API_CONFIG.BASE_URL}/vendors/${vendorId}/products`;
        
        console.log('🚀 Fetching products from:', apiUrl);
@@ -73,6 +83,11 @@ export default function ProductsPage() {
       if (data.data && Array.isArray(data.data)) {
         setProducts(data.data);
         console.log('✅ Products loaded:', data.data.length);
+        console.log('📊 Pagination:', data.pagination);
+      } else if (Array.isArray(data)) {
+        // Handle case where response is directly an array
+        setProducts(data);
+        console.log('✅ Products loaded (direct array):', data.length);
       } else {
         console.warn('⚠️ No products data found in response');
         setProducts([]);
@@ -108,15 +123,44 @@ export default function ProductsPage() {
            } finally {
         setLoading(false);
       }
-    }, [accessToken, user?.id]);
+    }, [accessToken, vendorId]);
 
   useEffect(() => {
     console.log('✅ ProductsPage component mounted successfully');
     console.log('📍 Current URL:', typeof window !== 'undefined' ? window.location.href : 'server-side');
     
-    // Fetch products on mount
-    fetchProducts();
-  }, [accessToken, user?.id, fetchProducts]);
+    // Add global error handler for images
+    const handleImageError = (event: ErrorEvent) => {
+      if (event.error?.message?.includes('Invalid src prop') || event.error?.message?.includes('next/image')) {
+        console.warn('Image loading error caught:', event.error.message);
+        event.preventDefault();
+        return false;
+      }
+    };
+
+    // Add global error handler
+    window.addEventListener('error', handleImageError);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('error', handleImageError);
+    };
+  }, []);
+
+  // Effect to fetch vendor details when we have access token but no vendor ID
+  useEffect(() => {
+    if (accessToken && !vendorId) {
+      console.log('🔄 Fetching vendor details...');
+      fetchVendorDetails();
+    }
+  }, [accessToken, vendorId, fetchVendorDetails]);
+
+  // Effect to fetch products when we have both access token and vendor ID
+  useEffect(() => {
+    if (accessToken && vendorId) {
+      fetchProducts();
+    }
+  }, [accessToken, vendorId, fetchProducts]);
 
   const handleRejectedProductClick = (product: Product) => {
     setSelectedRejectedProduct(product);
@@ -196,14 +240,19 @@ export default function ProductsPage() {
                  <div className="flex items-center justify-between">
            <div>
              <h1 className="text-3xl font-bold text-gray-900">Product Management</h1>
-             <p className="text-gray-600 mt-1">
-               Manage your products through the complete workflow: Draft → Review → Live
-               {!loading && products.length > 0 && (
-                 <span className="ml-2 text-green-600 font-medium">
-                   • {products.length} products loaded
-                 </span>
-               )}
-             </p>
+                            <p className="text-gray-600 mt-1">
+                 Manage your products through the complete workflow: Draft → Review → Live
+                 {isWaitingForVendor && (
+                   <span className="ml-2 text-yellow-600 font-medium">
+                     • Loading vendor information...
+                   </span>
+                 )}
+                 {!loading && !isWaitingForVendor && products.length > 0 && (
+                   <span className="ml-2 text-green-600 font-medium">
+                     • {products.length} products loaded
+                   </span>
+                 )}
+               </p>
              {/* Temporarily removed user welcome message for testing */}
            </div>
                       <div className="flex items-center gap-3">
@@ -259,7 +308,7 @@ export default function ProductsPage() {
         {/* Product Catalog Section */}
           <ProductCatalog 
             products={products}
-            loading={loading}
+            loading={loading || !!isWaitingForVendor}
             error={error}
             onRejectedClick={handleRejectedProductClick}
             onEdit={handleEditProduct}

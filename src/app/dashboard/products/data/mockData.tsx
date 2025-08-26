@@ -7,200 +7,258 @@ export const BUTTON_BASE =
 
 import React from 'react';
 
-// Product status type - added rejected
-export type ProductStatus = 'draft' | 'review' | 'live' | 'rejected';
+// Product status type - updated to match API
+export type ProductStatus = 'draft' | 'review' | 'live' | 'rejected' | 'approved';
 
-// Enhanced Product interface
+// New Product interface matching API response
 export interface Product {
   id: string;
-  name: string;
-  description: string;
-  price: string;
-  category: string;
+  name: {
+    en: string;
+    my: string;
+  };
   status: ProductStatus;
-  stock: number;
-  rating: number;
-  sales: number;
-  views: number;
-  icon: React.ReactNode;
   createdAt: string;
-  updatedAt: string;
-  isActive: boolean;
-  images?: string[];
+  sellingPrice: string;
+  mrp: string;
+  discount: string;
+  brand: {
+    id: string;
+    name: string;
+  };
+  categories: Array<{
+    id: string;
+    name: {
+      en: string;
+      my: string;
+    };
+  }>;
+  images: Array<{
+    id: string;
+    url: string;
+    isPrimary: boolean;
+    sortOrder: number;
+    altText: string | null;
+    metadata: any | null;
+  }>;
+  variants: Array<{
+    id: string;
+    sku: string;
+    price: string;
+    stock: number;
+    attributes: {
+      size: string;
+      color: string;
+    };
+  }>;
+  // Legacy fields for backward compatibility
+  description?: string;
+  price?: string;
+  category?: string;
+  stock?: number;
+  rating?: number;
+  sales?: number;
+  views?: number;
+  icon?: React.ReactNode;
+  updatedAt?: string;
+  isActive?: boolean;
   sku?: string;
-  rejectionReason?: string; // For rejected products
+  rejectionReason?: string;
 }
 
-// Mock products data with different statuses including rejected
+// Mock products data matching new API structure
 export const mockProducts: Product[] = [
   {
-    id: '1',
-    name: 'Wireless Headphones',
-    description: 'High-quality wireless headphones with noise cancellation',
-    price: '$199.99',
-    category: 'Electronics',
-    status: 'live',
-    stock: 45,
-    rating: 4.5,
-    sales: 124,
-    views: 1580,
-    isActive: true,
-    createdAt: '2024-01-15',
-    updatedAt: '2024-01-20',
-    sku: 'WH-001',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-headphones w-6 h-6 text-gray-400">
-        <path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/>
-      </svg>
-    ),
+    id: '73940c1b-50c6-4bc2-b08b-7c7e8a92c602',
+    name: {
+      en: 'Kitchen Knife',
+      my: 'Kitchen Knife'
+    },
+    status: 'approved',
+    createdAt: '2025-08-25T02:50:58.002Z',
+    sellingPrice: '5000.00',
+    mrp: '5000.00',
+    discount: '0.00',
+    brand: {
+      id: 'f790a8c5-6c6a-4d0e-b70d-618b52420161',
+      name: 'sisburma'
+    },
+    categories: [
+      {
+        id: '53ec5d83-fe61-4c8a-8c95-d4aab03f3060',
+        name: {
+          en: 'Home & Kitchen',
+          my: 'အိမ်သုံးပစ္စည်းနှင့် မီးဖိုချောင်ပစ္စည်းများ'
+        }
+      },
+      {
+        id: 'ce9c6b36-7dcb-4cdf-ad9c-dc2db59fb605',
+        name: {
+          en: 'Cookware',
+          my: 'ချက်ပြုတ်ကိရိယာများ'
+        }
+      }
+    ],
+    images: [
+      {
+        id: '6bf8adb8-12ea-4c90-b997-162b34d66625',
+        url: 'https://nakshtra-ecommerce.s3.ap-southeast-1.amazonaws.com/products/images/2cd2d756-0ca7-4af7-a907-fbfa7fc2fb4c.jpeg',
+        isPrimary: false,
+        sortOrder: 1,
+        altText: null,
+        metadata: null
+      },
+      {
+        id: '78ee09b9-d859-4e91-ab53-7b00751d33d4',
+        url: 'https://nakshtra-ecommerce.s3.ap-southeast-1.amazonaws.com/products/images/cc7b9ebd-6e57-469d-a429-2235effb1d18.jpeg',
+        isPrimary: true,
+        sortOrder: 0,
+        altText: null,
+        metadata: null
+      }
+    ],
+    variants: [
+      {
+        id: '8ebeb766-d733-4383-a752-27e104349ecc',
+        sku: 'Red-XL-1756090174024',
+        price: '5000.00',
+        stock: 50,
+        attributes: {
+          size: 'XL',
+          color: 'Red'
+        }
+      },
+      {
+        id: '20e9604a-2cb-4e1b-ac0e-b6091d7653ff',
+        sku: 'Red-L-1756090174024',
+        price: '5000.00',
+        stock: 50,
+        attributes: {
+          size: 'L',
+          color: 'Red'
+        }
+      },
+      {
+        id: 'ab595d8c-160a-4e62-8113-694d9274fec3',
+        sku: 'Red-M-1756090174024',
+        price: '5000.00',
+        stock: 50,
+        attributes: {
+          size: 'M',
+          color: 'Red'
+        }
+      },
+      {
+        id: 'ed6c6832-7ec1-4e6f-993c-a205d376a88c',
+        sku: 'Red-S-1756090174024',
+        price: '5000.00',
+        stock: 50,
+        attributes: {
+          size: 'S',
+          color: 'Red'
+        }
+      }
+    ]
   },
   {
-    id: '2',
-    name: 'Smart Watch Pro',
-    description: 'Advanced fitness tracking with health monitoring features',
-    price: '$299.99',
-    category: 'Wearables',
-    status: 'review',
-    stock: 0,
-    rating: 0,
-    sales: 0,
-    views: 45,
-    isActive: false,
-    createdAt: '2024-01-18',
-    updatedAt: '2024-01-19',
-    sku: 'SW-002',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-watch w-6 h-6 text-gray-400">
-        <circle cx="12" cy="12" r="6"/>
-        <polyline points="12,10 12,12 13,13"/>
-        <path d="m16.13 7.66-.81-4.05a2 2 0 0 0-2-1.61h-2.68a2 2 0 0 0-2 1.61l-.78 4.05"/>
-        <path d="m7.88 16.36.8 4a2 2 0 0 0 2 1.61h2.72a2 2 0 0 0 2-1.61l.81-4.05"/>
-      </svg>
-    ),
-  },
-  {
-    id: '3',
-    name: 'Gaming Keyboard',
-    description: 'Mechanical RGB gaming keyboard with custom switches',
-    price: '$149.99',
-    category: 'Gaming',
-    status: 'draft',
-    stock: 0,
-    rating: 0,
-    sales: 0,
-    views: 12,
-    isActive: false,
-    createdAt: '2024-01-20',
-    updatedAt: '2024-01-20',
-    sku: 'GK-003',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-keyboard w-6 h-6 text-gray-400">
-        <rect width="20" height="16" x="2" y="4" rx="2"/>
-        <path d="M6 8h.01"/>
-        <path d="M10 8h.01"/>
-        <path d="M14 8h.01"/>
-        <path d="M18 8h.01"/>
-        <path d="M8 12h.01"/>
-        <path d="M12 12h.01"/>
-        <path d="M16 12h.01"/>
-        <path d="M7 16h10"/>
-      </svg>
-    ),
-  },
-  {
-    id: '4',
-    name: 'Bluetooth Speaker',
-    description: 'Portable waterproof speaker with 12-hour battery life',
-    price: '$79.99',
-    category: 'Audio',
-    status: 'live',
-    stock: 23,
-    rating: 4.2,
-    sales: 89,
-    views: 945,
-    isActive: true,
-    createdAt: '2024-01-10',
-    updatedAt: '2024-01-15',
-    sku: 'BS-004',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-speaker w-6 h-6 text-gray-400">
-        <rect width="16" height="20" x="4" y="2" rx="2" ry="2"/>
-        <circle cx="12" cy="14" r="4"/>
-        <path d="m12 6 0 .01"/>
-      </svg>
-    ),
-  },
-  {
-    id: '5',
-    name: 'Wireless Mouse',
-    description: 'Ergonomic wireless mouse with precision tracking',
-    price: '$49.99',
-    category: 'Accessories',
-    status: 'draft',
-    stock: 0,
-    rating: 0,
-    sales: 0,
-    views: 8,
-    isActive: false,
-    createdAt: '2024-01-21',
-    updatedAt: '2024-01-21',
-    sku: 'WM-005',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-mouse w-6 h-6 text-gray-400">
-        <rect width="12" height="18" x="6" y="3" rx="6"/>
-        <path d="M12 7v4"/>
-      </svg>
-    ),
-  },
-  {
-    id: '6',
-    name: 'USB-C Hub',
-    description: '7-in-1 USB-C hub with 4K HDMI and fast charging',
-    price: '$89.99',
-    category: 'Accessories',
+    id: 'dec8eb44-9eeb-4dc8-9957-d0e737fe991d',
+    name: {
+      en: 'Jumping shoes',
+      my: 'Jumping shoes'
+    },
     status: 'rejected',
-    stock: 0,
-    rating: 0,
-    sales: 0,
-    views: 67,
-    isActive: false,
-    createdAt: '2024-01-17',
-    updatedAt: '2024-01-18',
-    sku: 'UH-006',
-    rejectionReason: 'Product images do not meet quality standards. Please provide high-resolution images with white background and multiple angles.',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-usb w-6 h-6 text-gray-400">
-        <circle cx="10" cy="7" r="1"/>
-        <circle cx="4" cy="20" r="1"/>
-        <path d="M4.7 19.3 19 5"/>
-        <path d="m21 3-3 1 2 2Z"/>
-        <path d="M9.26 7.68 5 12l2 5"/>
-        <path d="m10 14 5 2 2-2"/>
-      </svg>
-    ),
-  },
-  {
-    id: '7',
-    name: 'Phone Case Premium',
-    description: 'Military-grade protection phone case with card holder',
-    price: '$29.99',
-    category: 'Accessories',
-    status: 'rejected',
-    stock: 0,
-    rating: 0,
-    sales: 0,
-    views: 23,
-    isActive: false,
-    createdAt: '2024-01-19',
-    updatedAt: '2024-01-20',
-    sku: 'PC-007',
-    rejectionReason: 'Product description lacks required technical specifications and compatibility information.',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-smartphone w-6 h-6 text-gray-400">
-        <rect width="14" height="20" x="5" y="2" rx="2" ry="2"/>
-        <path d="M12 18h.01"/>
-      </svg>
-    ),
+    createdAt: '2025-08-22T08:45:49.858Z',
+    sellingPrice: '5000.00',
+    mrp: '5000.00',
+    discount: '0.00',
+    brand: {
+      id: '45a1329f-28c0-4399-848e-abd8b0ac27c6',
+      name: 'giordanomm'
+    },
+    categories: [
+      {
+        id: '66977148-6d83-4316-ba6b-d5eabffaaaeb',
+        name: {
+          en: 'Fashion',
+          my: 'ဖက်ရှင်'
+        }
+      },
+      {
+        id: '3f039f49-615e-467c-ae4f-1310bf12c420',
+        name: {
+          en: 'Tops',
+          my: 'အပေါ်ပိုင်း'
+        }
+      }
+    ],
+    images: [
+      {
+        id: '04165b86-4120-4203-85b1-364cea489720',
+        url: 'https://nakshtra-ecommerce.s3.ap-southeast-1.amazonaws.com/products/images/9419e1e4-f6b5-4e53-8000-cd847d660cf9.jpg',
+        isPrimary: false,
+        sortOrder: 1,
+        altText: null,
+        metadata: null
+      },
+      {
+        id: '5e5e2aaf-1ada-4418-b688-531b39233e6f',
+        url: 'https://nakshtra-ecommerce.s3.ap-southeast-1.amazonaws.com/products/images/77ea21f4-809f-41d9-af62-d9bf450bc849.jpg',
+        isPrimary: true,
+        sortOrder: 0,
+        altText: null,
+        metadata: null
+      },
+      {
+        id: 'bd31d842-70a1-4c27-8e8f-90b88a3154ae',
+        url: 'https://nakshtra-ecommerce.s3.ap-southeast-1.amazonaws.com/products/images/4782025a-0ebc-48d5-8e6b-d8bd075e916a.jpg',
+        isPrimary: false,
+        sortOrder: 2,
+        altText: null,
+        metadata: null
+      }
+    ],
+    variants: [
+      {
+        id: '60d75110-e18d-46d7-a280-b3e311eac8c2',
+        sku: 'Red-L-1755852291391',
+        price: '5000.00',
+        stock: 50,
+        attributes: {
+          size: 'L',
+          color: 'Red'
+        }
+      },
+      {
+        id: '5d13926b-c9f1-44d7-854a-d106b8a456d9',
+        sku: 'Red-M-1755852291391',
+        price: '5000.00',
+        stock: 50,
+        attributes: {
+          size: 'M',
+          color: 'Red'
+        }
+      },
+      {
+        id: '01d7b30e-ba5e-4a8e-9e1c-5ec5a56919ee',
+        sku: 'Red-XL-1755852291391',
+        price: '5000.00',
+        stock: 50,
+        attributes: {
+          size: 'XL',
+          color: 'Red'
+        }
+      },
+      {
+        id: 'bd73514c-6f30-43df-8314-29e0948e44eb',
+        sku: 'Red-S-1755852291391',
+        price: '5000.00',
+        stock: 50,
+        attributes: {
+          size: 'S',
+          color: 'Red'
+        }
+      }
+    ]
   }
 ];
 
@@ -239,6 +297,18 @@ export const statusConfig: Record<ProductStatus, {
   },
   live: {
     label: 'Live',
+    color: 'bg-green-100 text-green-800 border border-green-200',
+    bgColor: '#DCFCE7',
+    textColor: '#16A34A',
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-check-circle">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22,4 12,14.01 9,11.01"/>
+      </svg>
+    )
+  },
+  approved: {
+    label: 'Approved',
     color: 'bg-green-100 text-green-800 border border-green-200',
     bgColor: '#DCFCE7',
     textColor: '#16A34A',

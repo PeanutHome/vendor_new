@@ -1,4 +1,5 @@
 export const API_CONFIG = {
+  // Note: For local development, you might want to use: BASE_URL: 'http://localhost:5000'
   BASE_URL: 'https://ecommerce-2-cdft.onrender.com',
   ENDPOINTS: {
     LOGIN: '/auth/login',
@@ -12,3 +13,4 @@ export const API_CONFIG = {
     ADMIN_BRANDS: '/products/brands/list', // Get brands for product creation
   }
 } as const;
+

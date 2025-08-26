@@ -17,12 +17,13 @@ export function ProductCatalog({ products, loading, error, onRejectedClick, onEd
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
-  // Helper function to map API status to display status (same as ProductCard)
+  // Helper function to map API status to display status
   const getDisplayStatus = (apiStatus: string) => {
     switch (apiStatus) {
       case 'approved': return 'live';
       case 'pending': return 'review';
       case 'rejected': return 'rejected';
+      case 'draft': return 'draft';
       default: return 'draft';
     }
   };
@@ -30,16 +31,27 @@ export function ProductCatalog({ products, loading, error, onRejectedClick, onEd
   // Filter products based on active tab and search
   const filteredProducts = products.filter(product => {
     const matchesTab = activeTab === 'all' || getDisplayStatus(product.status) === activeTab;
-    const matchesSearch = product.name?.en?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         product.description?.en?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || product.categories?.[0]?.name?.en === selectedCategory;
+    
+    // Search in product name (English and Myanmar)
+    const matchesSearch = 
+      product.name?.en?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.name?.my?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.brand?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.variants?.some((v: any) => v.sku?.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    // Filter by category
+    const matchesCategory = selectedCategory === 'all' || 
+      product.categories?.some((cat: any) => cat.name?.en === selectedCategory);
+    
     return matchesTab && matchesSearch && matchesCategory;
   });
 
   // Get unique categories from real products
-  const categories = ['all', ...Array.from(new Set(products.map(p => p.categories?.[0]?.name?.en).filter(Boolean)))];
+  const categories = ['all', ...Array.from(new Set(
+    products.flatMap(p => p.categories?.map((cat: any) => cat.name?.en)).filter(Boolean)
+  ))];
 
-  // Tab configuration with rejected status - count based on mapped display status
+  // Tab configuration with counts based on mapped display status
   const tabs = [
     { id: 'all' as const, label: 'All Products', count: products.length },
     { id: 'draft' as const, label: 'Drafts', count: products.filter(p => getDisplayStatus(p.status) === 'draft').length },
@@ -63,7 +75,7 @@ export function ProductCatalog({ products, loading, error, onRejectedClick, onEd
               </svg>
               <input 
                 className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm pl-10 w-64" 
-                placeholder="Search products..." 
+                placeholder="Search products, brands, SKU..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />

@@ -1,5 +1,6 @@
 import { API_CONFIG } from './config';
 import { useAuthStore } from './auth-store';
+import { apiCallWithRefresh } from './utils';
 
 export interface ProductVariant {
   sku: string;
@@ -78,7 +79,7 @@ export const useProductAPI = () => {
     productData: ProductData
   ): Promise<{ success: boolean; message?: string; error?: string; productId?: string }> => {
     try {
-      const { accessToken, user } = useAuthStore.getState();
+      const { accessToken } = useAuthStore.getState();
       
       if (!accessToken) {
         console.error('❌ No access token available');
@@ -88,15 +89,8 @@ export const useProductAPI = () => {
         };
       }
 
-      if (!user || !user.id) {
-        console.error('❌ No user ID available');
-        return {
-          success: false,
-          error: 'No user ID available. Please log in again.',
-        };
-      }
-
-      const vendorId = user.id;
+      // Use specific vendor ID for homepage product list
+      const vendorId = 'f7c7937d-e5cf-47dd-be66-063f0f688c6c';
       const apiUrl = `${API_CONFIG.BASE_URL}/vendors/${vendorId}/products`;
       console.log('🚀 Creating product for vendor:', vendorId);
       console.log('🌐 API URL:', apiUrl);
@@ -129,7 +123,7 @@ export const useProductAPI = () => {
         console.log('📸 Images added to FormData:', images.length, 'files');
       }
 
-      const response = await fetch(apiUrl, {
+      const response = await apiCallWithRefresh(apiUrl, {
         method: 'POST',
         headers,
         body: formData,
@@ -171,7 +165,7 @@ export const useProductAPI = () => {
     productData: Partial<ProductData>
   ): Promise<{ success: boolean; message?: string; error?: string }> => {
     try {
-      const { accessToken, user } = useAuthStore.getState();
+      const { accessToken } = useAuthStore.getState();
       
       if (!accessToken) {
         console.error('❌ No access token available');
@@ -181,15 +175,8 @@ export const useProductAPI = () => {
         };
       }
 
-      if (!user || !user.id) {
-        console.error('❌ No user ID available');
-        return {
-          success: false,
-          error: 'No user ID available. Please log in again.',
-        };
-      }
-
-      const vendorId = user.id;
+      // Use specific vendor ID for homepage product list
+      const vendorId = 'f7c7937d-e5cf-47dd-be66-063f0f688c6c';
       console.log('🔄 Updating product:', productId);
       console.log('📦 Update data:', productData);
 
@@ -214,7 +201,7 @@ export const useProductAPI = () => {
         console.log('📸 Images added to FormData for update:', images.length, 'files');
       }
 
-      const response = await fetch(`${API_CONFIG.BASE_URL}/vendors/${vendorId}/products/${productId}`, {
+      const response = await apiCallWithRefresh(`${API_CONFIG.BASE_URL}/vendors/${vendorId}/products/${productId}`, {
         method: 'PUT',
         headers,
         body: formData,
@@ -251,7 +238,7 @@ export const useProductAPI = () => {
     productId: string
   ): Promise<{ success: boolean; message?: string; error?: string }> => {
     try {
-      const { accessToken, user } = useAuthStore.getState();
+      const { accessToken } = useAuthStore.getState();
       
       if (!accessToken) {
         console.error('❌ No access token available');
@@ -261,22 +248,15 @@ export const useProductAPI = () => {
         };
       }
 
-      if (!user || !user.id) {
-        console.error('❌ No user ID available');
-        return {
-          success: false,
-          error: 'No user ID available. Please log in again.',
-        };
-      }
-
-      const vendorId = user.id;
+      // Use specific vendor ID for homepage product list
+      const vendorId = 'f7c7937d-e5cf-47dd-be66-063f0f688c6c';
       console.log('🗑️ Deleting product:', productId);
 
       const headers = {
         'Authorization': `Bearer ${accessToken}`,
       };
 
-      const response = await fetch(`${API_CONFIG.BASE_URL}/vendors/${vendorId}/products/${productId}`, {
+      const response = await apiCallWithRefresh(`${API_CONFIG.BASE_URL}/vendors/${vendorId}/products/${productId}`, {
         method: 'DELETE',
         headers,
       });
@@ -313,7 +293,7 @@ export const useProductAPI = () => {
     limit: number = 10
   ): Promise<{ success: boolean; products?: ProductData[]; error?: string; total?: number }> => {
     try {
-      const { accessToken, user } = useAuthStore.getState();
+      const { accessToken } = useAuthStore.getState();
       
       if (!accessToken) {
         console.error('❌ No access token available');
@@ -323,22 +303,15 @@ export const useProductAPI = () => {
         };
       }
 
-      if (!user || !user.id) {
-        console.error('❌ No user ID available');
-        return {
-          success: false,
-          error: 'No user ID available. Please log in again.',
-        };
-      }
-
-      const vendorId = user.id;
+      // Use specific vendor ID for homepage product list
+      const vendorId = 'f7c7937d-e5cf-47dd-be66-063f0f688c6c';
       console.log('📋 Fetching products for vendor:', vendorId);
 
       const headers = {
         'Authorization': `Bearer ${accessToken}`,
       };
 
-      const response = await fetch(`${API_CONFIG.BASE_URL}/vendors/${vendorId}/products?page=${page}&limit=${limit}`, {
+      const response = await apiCallWithRefresh(`${API_CONFIG.BASE_URL}/vendors/${vendorId}/products?page=${page}&limit=${limit}`, {
         method: 'GET',
         headers,
       });
@@ -378,7 +351,7 @@ export const useProductAPI = () => {
     productId: string
   ): Promise<{ success: boolean; product?: ProductData; error?: string }> => {
     try {
-      const { accessToken, user } = useAuthStore.getState();
+      const { accessToken } = useAuthStore.getState();
       
       if (!accessToken) {
         console.error('❌ No access token available');
@@ -388,22 +361,15 @@ export const useProductAPI = () => {
         };
       }
 
-      if (!user || !user.id) {
-        console.error('❌ No user ID available');
-        return {
-          success: false,
-          error: 'No user ID available. Please log in again.',
-        };
-      }
-
-      const vendorId = user.id;
+      // Use specific vendor ID for homepage product list
+      const vendorId = 'f7c7937d-e5cf-47dd-be66-063f0f688c6c';
       console.log('📋 Fetching product:', productId);
 
       const headers = {
         'Authorization': `Bearer ${accessToken}`,
       };
 
-      const response = await fetch(`${API_CONFIG.BASE_URL}/vendors/${vendorId}/products/${productId}`, {
+      const response = await apiCallWithRefresh(`${API_CONFIG.BASE_URL}/vendors/${vendorId}/products/${productId}`, {
         method: 'GET',
         headers,
       });
@@ -447,7 +413,7 @@ export const useProductAPI = () => {
     }
   ): Promise<{ success: boolean; message?: string; error?: string; reviewId?: string }> => {
     try {
-      const { accessToken, user } = useAuthStore.getState();
+      const { accessToken } = useAuthStore.getState();
       
       if (!accessToken) {
         console.error('❌ No access token available');
@@ -457,15 +423,8 @@ export const useProductAPI = () => {
         };
       }
 
-      if (!user || !user.id) {
-        console.error('❌ No user ID available');
-        return {
-          success: false,
-          error: 'No user ID available. Please log in again.',
-        };
-      }
-
-      const vendorId = user.id;
+      // Use specific vendor ID for homepage product list
+      const vendorId = 'f7c7937d-e5cf-47dd-be66-063f0f688c6c';
       const apiUrl = `${API_CONFIG.BASE_URL}/vendors/${vendorId}/products/${productId}/review`;
       console.log('🔍 Submitting product for review:', productId);
       console.log('👤 Vendor ID:', vendorId);
@@ -489,7 +448,7 @@ export const useProductAPI = () => {
       console.log('🔑 Full Authorization header:', `Bearer ${accessToken}`);
       console.log('🔑 Access token length:', accessToken.length);
       
-      const response = await fetch(apiUrl, {
+      const response = await apiCallWithRefresh(apiUrl, {
         method: 'POST',
         headers,
         body: JSON.stringify(payload),
@@ -587,7 +546,7 @@ export const updateProductImmediate = async (
       'Authorization': `Bearer ${accessToken}`,
     };
 
-    const response = await fetch(`${API_CONFIG.BASE_URL}/vendors/${vendorId}/products/${productId}`, {
+    const response = await apiCallWithRefresh(`${API_CONFIG.BASE_URL}/vendors/${vendorId}/products/${productId}`, {
       method: 'PATCH',
       headers,
       body: JSON.stringify(immediateFields),

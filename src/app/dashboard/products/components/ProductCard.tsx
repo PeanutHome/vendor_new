@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { statusConfig } from "../data/mockData";
 
 interface ProductCardProps {
@@ -22,6 +23,16 @@ export function ProductCard({ product, onRejectedClick, onEdit, onQuickEdit }: P
   
   const displayStatus = getDisplayStatus(product.status);
   const statusInfo = statusConfig[displayStatus];
+
+  // Get primary image or first image
+  const primaryImage = product.images?.find((img: any) => img.isPrimary) || product.images?.[0];
+  
+  // Get total stock from variants
+  const totalStock = product.variants?.reduce((sum: number, variant: any) => sum + (variant.stock || 0), 0) || 0;
+  
+  // Get unique colors and sizes from variants
+  const colors = [...new Set(product.variants?.map((v: any) => v.attributes?.color).filter(Boolean) || [])];
+  const sizes = [...new Set(product.variants?.map((v: any) => v.attributes?.size).filter(Boolean) || [])];
 
   const handleRejectedClick = () => {
     if (product.status === 'rejected' && onRejectedClick) {
@@ -57,55 +68,106 @@ export function ProductCard({ product, onRejectedClick, onEdit, onQuickEdit }: P
       }`}
       onClick={product.status === 'rejected' ? handleRejectedClick : undefined}
     >
-              <div className="flex items-center space-x-4">
-          <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
-            {/* Placeholder icon since API doesn't provide icons */}
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-package w-6 h-6 text-gray-400">
-              <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"></path>
-              <path d="M12 22V12"></path>
-              <path d="m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7"></path>
-              <path d="m7.5 4.27 9 5.15"></path>
-            </svg>
+      <div className="flex items-center space-x-4">
+        <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
+          {primaryImage ? (
+            <Image 
+              src={primaryImage.url} 
+              alt={primaryImage.altText || product.name?.en || 'Product image'}
+              width={64}
+              height={64}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                // Fallback to placeholder if image fails to load
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                target.nextElementSibling?.classList.remove('hidden');
+              }}
+            />
+          ) : null}
+          {/* Fallback placeholder - always present but hidden when image is shown */}
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width="24" 
+            height="24" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            className={`lucide lucide-package w-6 h-6 text-gray-400 ${primaryImage ? 'hidden' : ''}`}
+          >
+            <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4A2 2 0 0 0 2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"></path>
+            <path d="M12 22V12"></path>
+            <path d="m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7"></path>
+            <path d="m7.5 4.27 9 5.15"></path>
+          </svg>
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <h3 className="font-medium text-gray-900">{product.name?.en || product.name}</h3>
+            {product.variants?.[0]?.sku && (
+              <span className="text-xs text-gray-500">#{product.variants[0].sku}</span>
+            )}
+            {product.status === 'rejected' && (
+              <span className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded">
+                Click to view details
+              </span>
+            )}
           </div>
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <h3 className="font-medium text-gray-900">{product.name?.en || product.name}</h3>
-              <span className="text-xs text-gray-500">#{product.sku}</span>
-              {product.status === 'rejected' && (
-                <span className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded">
-                  Click to view details
-                </span>
-              )}
-            </div>
-            <p className="text-sm text-gray-600 mt-1">{product.description?.en || product.description}</p>
-            <div className="flex items-center space-x-4 mt-2">
-              <span className="text-lg font-bold text-primary">MMK {product.sellingPrice}</span>
-              <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground">
-                {product.categories?.[0]?.name?.en || 'Unknown Category'}
+          
+          {/* Brand and Categories */}
+          <div className="flex items-center gap-2 mt-1">
+            {product.brand?.name && (
+              <span className="text-sm text-gray-600 font-medium">{product.brand.name}</span>
+            )}
+            {product.categories?.length > 0 && (
+              <div className="flex items-center gap-1">
+                {product.categories.slice(0, 2).map((cat: any, index: number) => (
+                  <span key={cat.id} className="text-xs text-gray-500">
+                    {cat.name?.en || cat.name}
+                    {index < product.categories.length - 1 && index < 1 && ' •'}
+                  </span>
+                ))}
               </div>
-              <div className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors ${statusInfo.color}`}>
-                {statusInfo.icon}
-                {statusInfo.label}
-              </div>
-              {displayStatus === 'live' && (
-                <>
-                  <span className="text-sm text-gray-500">Stock: dmt* 100</span>
-                  <div className="flex items-center space-x-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-star w-4 h-4 text-yellow-400 fill-current">
-                      <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>
-                    </svg>
-                    <span className="text-sm">dmt* 4.5</span>
-                    <span className="text-sm text-gray-500">(dmt* 25 sales)</span>
-                  </div>
-                  <span className="text-sm text-gray-500">dmt* 150 views</span>
-                </>
-              )}
-              {displayStatus !== 'live' && (
-                <span className="text-sm text-gray-500">Created: {new Date(product.createdAt).toLocaleDateString()}</span>
-              )}
+            )}
+          </div>
+
+          {/* Price and Status */}
+          <div className="flex items-center space-x-4 mt-2">
+            <span className="text-lg font-bold text-primary">MMK {product.sellingPrice}</span>
+            {product.mrp !== product.sellingPrice && (
+              <span className="text-sm text-gray-500 line-through">MMK {product.mrp}</span>
+            )}
+            {product.discount !== '0.00' && (
+              <span className="text-sm text-green-600 font-medium">{product.discount}% OFF</span>
+            )}
+            <div className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors ${statusInfo.color}`}>
+              {statusInfo.icon}
+              {statusInfo.label}
             </div>
+          </div>
+
+          {/* Variants and Stock Info */}
+          <div className="flex items-center space-x-4 mt-2">
+            {product.variants?.length > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">Variants:</span>
+                {colors.length > 0 && (
+                  <span className="text-xs bg-gray-100 px-2 py-1 rounded">{colors.join(', ')}</span>
+                )}
+                {sizes.length > 0 && (
+                  <span className="text-xs bg-gray-100 px-2 py-1 rounded">{sizes.join(', ')}</span>
+                )}
+              </div>
+            )}
+            <span className="text-sm text-gray-500">Total Stock: {totalStock}</span>
+            <span className="text-sm text-gray-500">Created: {new Date(product.createdAt).toLocaleDateString()}</span>
           </div>
         </div>
+      </div>
+
       <div className="flex items-center space-x-4">
         {displayStatus === 'live' && (
           <div className="flex items-center space-x-2">
@@ -113,7 +175,7 @@ export function ProductCard({ product, onRejectedClick, onEdit, onQuickEdit }: P
             <div className="relative">
               <input
                 type="checkbox"
-                checked={true} // dmt* - API doesn't provide this field
+                checked={true} // API doesn't provide this field
                 className="sr-only"
                 readOnly
               />
@@ -124,6 +186,7 @@ export function ProductCard({ product, onRejectedClick, onEdit, onQuickEdit }: P
             <span className="text-sm text-green-600">Active</span>
           </div>
         )}
+        
         <div className="flex items-center space-x-2">
           <button 
             onClick={handleQuickEdit}

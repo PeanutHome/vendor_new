@@ -1,5 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { API_CONFIG } from "@/lib/config";
+import React, { useState, useEffect } from 'react';
+import { Check, ChevronsUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { API_CONFIG } from '@/lib/config';
+import { apiCallWithRefresh } from '@/lib/utils';
 
 // Type for API category structure
 interface APICategory {
@@ -49,7 +55,7 @@ export function CategorySelection({
     const fetchCategories = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PRODUCT_CATEGORIES}`);
+        const response = await apiCallWithRefresh(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PRODUCT_CATEGORIES}`);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

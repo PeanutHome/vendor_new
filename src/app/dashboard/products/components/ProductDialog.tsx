@@ -31,35 +31,39 @@ interface ProductDialogProps {
 export function ProductDialog({ open, onClose, product }: ProductDialogProps) {
   const { updateProduct } = useProductAPI();
 
-  // Convert old Product type to new ProductData type
+  // Add loading states for different actions
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmittingForReview, setIsSubmittingForReview] = useState(false);
+
+  // Convert Product type to ProductData type
   const convertProductToProductData = (oldProduct: Product): ProductData => {
     return {
       id: oldProduct.id,
       name: {
-        en: oldProduct.name,
-        my: oldProduct.name // Default to English name for Myanmar
+        en: typeof oldProduct.name === 'string' ? oldProduct.name : oldProduct.name?.en || "",
+        my: typeof oldProduct.name === 'string' ? oldProduct.name : oldProduct.name?.my || ""
       },
       subtitle: "",
       description: {
-        en: oldProduct.description,
-        my: oldProduct.description // Default to English description for Myanmar
+        en: oldProduct.description || "",
+        my: oldProduct.description || ""
       },
       brandId: "",
       hsnCode: "",
       modelNumber: oldProduct.sku || "",
-      sku: oldProduct.sku || "", // ✅ ADDED: SKU field
+      sku: oldProduct.sku || "",
       gender: [],
       keyFeatures: [],
       howToUse: "",
       ingredients: "",
       material: "",
       variants: [],
-      mrp: parseFloat(oldProduct.price.replace(/[^\d.]/g, '')) || 0,
-      price: parseFloat(oldProduct.price.replace(/[^\d.]/g, '')) || 0,
-      sellingPrice: parseFloat(oldProduct.price.replace(/[^\d.]/g, '')) || 0,
+      mrp: parseFloat((oldProduct.price || "0").replace(/[^\d.]/g, '')) || 0,
+      price: parseFloat((oldProduct.price || "0").replace(/[^\d.]/g, '')) || 0,
+      sellingPrice: parseFloat((oldProduct.price || "0").replace(/[^\d.]/g, '')) || 0,
       taxClass: "",
       discount: 0,
-      lowStockThreshold: 10, // ✅ ADDED: Default low stock threshold
+      lowStockThreshold: 10,
       categoryIds: oldProduct.category ? [oldProduct.category] : [],
       searchTags: [],
       colors: [],
@@ -79,12 +83,12 @@ export function ProductDialog({ open, onClose, product }: ProductDialogProps) {
       },
       netWeight: 0,
       packType: "",
-      inStock: oldProduct.stock > 0,
+      inStock: (oldProduct.stock || 0) > 0,
       videoUrl: "",
       videoType: "youtube",
-      images: [], // No images in old product data
-      metaTitle: oldProduct.name,
-      metaDescription: oldProduct.description,
+      images: [],
+      metaTitle: typeof oldProduct.name === 'string' ? oldProduct.name : oldProduct.name?.en || "",
+      metaDescription: oldProduct.description || "",
       internalNotes: "",
       isLive: oldProduct.status === 'live',
       showInNewArrivals: false,
@@ -731,6 +735,9 @@ export function ProductDialog({ open, onClose, product }: ProductDialogProps) {
       return;
     }
     
+    // Set loading state
+    setIsSubmitting(true);
+    
     const productData: ProductData = {
       ...(product && 'id' in product && { id: product.id }),
       name: {
@@ -745,7 +752,7 @@ export function ProductDialog({ open, onClose, product }: ProductDialogProps) {
       brandId: brandId,
       hsnCode: hsnCode,
       modelNumber: modelNumber,
-      sku: sku, // ✅ ADDED: SKU field
+      sku: sku,
       gender: gender,
       keyFeatures: keyFeatures,
       howToUse: howToUse,
@@ -759,15 +766,15 @@ export function ProductDialog({ open, onClose, product }: ProductDialogProps) {
         },
         price: variant.price,
         stock: variant.stock,
-        lowStockThreshold: 10 // ✅ ADDED: Default low stock threshold
+        lowStockThreshold: 10
       })),
       mrp: parseFloat(mrp),
       price: parseFloat(price),
       sellingPrice: parseFloat(sellingPrice),
       taxClass: taxClass,
       discount: parseFloat(discount),
-      lowStockThreshold: 10, // ✅ ADDED: Default low stock threshold
-      categoryIds: [mainCategory, subCategory, subSubCategory].filter(Boolean), // Now using real IDs directly
+      lowStockThreshold: 10,
+      categoryIds: [mainCategory, subCategory, subSubCategory].filter(Boolean),
       searchTags: searchTags,
       colors: variants.map(v => v.attributes.color).filter((v, i, a) => a.indexOf(v) === i),
       sizes: variants.map(v => v.attributes.size).filter((v, i, a) => a.indexOf(v) === i),
@@ -789,7 +796,7 @@ export function ProductDialog({ open, onClose, product }: ProductDialogProps) {
       inStock: variants.some(v => v.stock > 0),
       videoUrl: videoUrl || "",
       videoType: videoType || "youtube",
-      images: selectedFiles.filter((file): file is File => file !== null), // Send File objects like dummy.ts
+      images: selectedFiles.filter((file): file is File => file !== null),
       metaTitle: metaTitle || productNameEn,
       metaDescription: metaDescription || productDescriptionEn,
       internalNotes: internalNotes || "",
@@ -833,7 +840,7 @@ export function ProductDialog({ open, onClose, product }: ProductDialogProps) {
       categoryIds: productData.categoryIds,
       colors: productData.colors,
       sizes: productData.sizes,
-      images: productData.images, // Add images to logging
+      images: productData.images,
       imageCount: productData.images?.length || 0,
       isLive: productData.isLive
     });
@@ -917,11 +924,15 @@ export function ProductDialog({ open, onClose, product }: ProductDialogProps) {
         console.log('📝 Full API Response:', responseData);
         console.log('💬 API Message:', successMessage);
         
-        onClose();
+        // Don't close immediately - let user see the success message
+        setTimeout(() => onClose(), 3000);
       }
     } catch (error) {
       console.error("Error saving product:", error);
       showMessage('error', "Error saving product. Please try again.");
+    } finally {
+      // Always clear loading state
+      setIsSubmitting(false);
     }
   };
 
@@ -934,6 +945,9 @@ export function ProductDialog({ open, onClose, product }: ProductDialogProps) {
       showMessage('error', 'Please fill in all required fields before submitting for review.');
       return;
     }
+
+    // Set loading state
+    setIsSubmittingForReview(true);
 
     try {
       const productData: ProductData = {
@@ -1088,6 +1102,9 @@ export function ProductDialog({ open, onClose, product }: ProductDialogProps) {
     } catch (error) {
       console.error('💥 Error in review submission process:', error);
       showMessage('error', "Error submitting product for review. Please try again.");
+    } finally {
+      // Always clear loading state
+      setIsSubmittingForReview(false);
     }
   };
 
@@ -1265,6 +1282,18 @@ export function ProductDialog({ open, onClose, product }: ProductDialogProps) {
                   <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* Loading State Display */}
+        {(isSubmitting || isSubmittingForReview) && (
+          <div className="px-6 py-3 mx-6 rounded-lg border bg-blue-50 border-blue-200 text-blue-800">
+            <div className="flex items-center gap-2">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+              <span className="font-medium">
+                {isSubmitting ? 'Saving product...' : 'Submitting for review...'}
+              </span>
             </div>
           </div>
         )}
@@ -1451,20 +1480,30 @@ export function ProductDialog({ open, onClose, product }: ProductDialogProps) {
             <div className="flex gap-3">
               <button
                 type="button"
+                disabled={isSubmitting || isSubmittingForReview}
                 className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 h-10 px-4 py-2"
                 onClick={() => {
                   setPublishStatus(PublishStatus.DRAFT);
                   handleSubmit();
                 }}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                  <polyline points="14,2 14,8 20,8" />
-                  <line x1="16" x2="8" y1="13" y2="13" />
-                  <line x1="16" x2="8" y1="17" y2="17" />
-                  <polyline points="10,9 9,9 8,9" />
-                </svg>
-                Save as Draft
+                {isSubmitting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <polyline points="14,2 14,8 20,8" />
+                      <line x1="16" x2="8" y1="13" y2="13" />
+                      <line x1="16" x2="8" y1="17" y2="17" />
+                      <polyline points="10,9 9,9 8,9" />
+                    </svg>
+                    Save as Draft
+                  </>
+                )}
               </button>
               <button
                 type="button"
@@ -1479,17 +1518,27 @@ export function ProductDialog({ open, onClose, product }: ProductDialogProps) {
               </button>
               <button
                 type="button"
+                disabled={isSubmitting || isSubmittingForReview}
                 className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 text-white shadow h-10 px-4 py-2"
                 style={{ backgroundColor: PRIMARY_GREEN }}
                 onClick={handleSubmitForReview}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-                  <path d="M9 12l2 2 4-4" />
-                  <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3" />
-                  <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3" />
-                  <path d="M21 12c0 2.5-2 4.5-4.5 4.5S12 14.5 12 12s2-4.5 4.5-4.5S21 9.5 21 12z" />
-                </svg>
-                Submit for Review
+                {isSubmittingForReview ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+                      <path d="M9 12l2 2 4-4" />
+                      <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3" />
+                      <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3" />
+                      <path d="M21 12c0 2.5-2 4.5-4.5 4.5S12 14.5 12 12s2-4.5 4.5-4.5S21 9.5 21 12z" />
+                    </svg>
+                    Submit for Review
+                  </>
+                )}
               </button>
             </div>
           </div>

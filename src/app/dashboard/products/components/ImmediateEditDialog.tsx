@@ -2,6 +2,16 @@
 import React, { useState, useEffect } from "react";
 import { updateProductImmediate } from "@/lib/product-api";
 import { useAuthStore } from "@/lib/auth-store";
+import { 
+  Gender, 
+  DispatchTime, 
+  ReturnPolicy, 
+  PackType, 
+  Language, 
+  ProductStatus, 
+  ProductType 
+} from "@/lib/enums";
+import { API_CONFIG } from "@/lib/config";
 
 interface ImmediateEditDialogProps {
   open: boolean;
@@ -14,6 +24,14 @@ export function ImmediateEditDialog({ open, onClose, product, onSuccess }: Immed
   const { user } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Log user info when component mounts
+  useEffect(() => {
+    if (user) {
+      console.log('👤 Current user in Quick Edit:', user);
+      console.log('🆔 User ID:', user.id);
+    }
+  }, [user]);
 
   // Form state for immediate edit fields
   const [gender, setGender] = useState<string[]>([]);
@@ -34,6 +52,10 @@ export function ImmediateEditDialog({ open, onClose, product, onSuccess }: Immed
   const [codAvailable, setCodAvailable] = useState(false);
   const [dispatchTime, setDispatchTime] = useState("");
   const [returnPolicy, setReturnPolicy] = useState("");
+  const [packType, setPackType] = useState<string>("");
+  const [language, setLanguage] = useState<string>("");
+  const [productStatus, setProductStatus] = useState<string>("");
+  const [productType, setProductType] = useState<string>("");
 
   // Temporary state for adding new items
   const [newKeyFeature, setNewKeyFeature] = useState("");
@@ -44,6 +66,10 @@ export function ImmediateEditDialog({ open, onClose, product, onSuccess }: Immed
   // Initialize form when product changes
   useEffect(() => {
     if (product && open) {
+      console.log('📱 Quick Edit Dialog opened for product:', product);
+      console.log('🆔 Product ID:', product.id);
+      console.log('📝 Product Name:', product.name);
+      
       setGender(product.gender || []);
       setKeyFeatures(product.keyFeatures || []);
       setVariants(product.variants || []);
@@ -57,6 +83,12 @@ export function ImmediateEditDialog({ open, onClose, product, onSuccess }: Immed
       setCodAvailable(product.codAvailable || false);
       setDispatchTime(product.dispatchTime || "");
       setReturnPolicy(product.returnPolicy || "");
+      setPackType(product.packType || "");
+      setLanguage(product.language || "");
+      setProductStatus(product.productStatus || "");
+      setProductType(product.productType || "");
+      
+      console.log('📊 Form initialized with current values');
     }
   }, [product, open]);
 
@@ -84,18 +116,34 @@ export function ImmediateEditDialog({ open, onClose, product, onSuccess }: Immed
         codAvailable,
         dispatchTime,
         returnPolicy,
+        packType,
+        language,
+        productStatus,
+        productType,
       };
+
+      console.log('🚀 Quick Edit - Starting immediate update...');
+      console.log('👤 User ID:', user.id);
+      console.log('📦 Product ID:', product.id);
+      console.log('🔗 API Endpoint:', `${API_CONFIG.BASE_URL}/vendors/${user.id}/products/${product.id}`);
+      console.log('🔗 Full URL:', `${API_CONFIG.BASE_URL}/vendors/${user.id}/products/${product.id}`);
+      console.log('📋 Fields to update:', immediateFields);
+      console.log('🔑 Bearer token will be included automatically');
+      console.log('📡 HTTP Method: PATCH (as defined in updateProductImmediate)');
 
       const result = await updateProductImmediate(user.id, product.id, immediateFields);
       
       if (result.success) {
+        console.log('✅ Quick edit successful!');
         alert(result.message || "Product updated immediately!");
         onSuccess?.();
         onClose();
       } else {
+        console.error('❌ Quick edit failed:', result.error);
         setError(result.error || "Failed to update product");
       }
     } catch (error) {
+      console.error('💥 Unexpected error in quick edit:', error);
       setError("An unexpected error occurred");
       console.error("Error updating product:", error);
     } finally {
@@ -241,7 +289,7 @@ export function ImmediateEditDialog({ open, onClose, product, onSuccess }: Immed
                 Gender
               </label>
               <div className="space-y-2">
-                {['men', 'women'].map((g) => (
+                {Object.values(Gender).map((g) => (
                   <label key={g} className="flex items-center">
                     <input
                       type="checkbox"
@@ -360,11 +408,9 @@ export function ImmediateEditDialog({ open, onClose, product, onSuccess }: Immed
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
               >
                 <option value="">Select dispatch time</option>
-                <option value="same_day">Same Day</option>
-                <option value="1_2_days">1-2 Days</option>
-                <option value="2_3_days">2-3 Days</option>
-                <option value="3_5_days">3-5 Days</option>
-                <option value="5_7_days">5-7 Days</option>
+                {Object.values(DispatchTime).map(dt => (
+                  <option key={dt} value={dt}>{dt}</option>
+                ))}
               </select>
             </div>
 
@@ -379,10 +425,77 @@ export function ImmediateEditDialog({ open, onClose, product, onSuccess }: Immed
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
               >
                 <option value="">Select return policy</option>
-                <option value="no_returns">No Returns</option>
-                <option value="7_days">7 Days</option>
-                <option value="15_days">15 Days</option>
-                <option value="30_days">30 Days</option>
+                {Object.values(ReturnPolicy).map(rp => (
+                  <option key={rp} value={rp}>{rp}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Pack Type */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Pack Type
+              </label>
+              <select
+                value={packType}
+                onChange={(e) => setPackType(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              >
+                <option value="">Select pack type</option>
+                {Object.values(PackType).map(pt => (
+                  <option key={pt} value={pt}>{pt}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Language */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Language
+              </label>
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              >
+                <option value="">Select language</option>
+                {Object.values(Language).map(lang => (
+                  <option key={lang} value={lang}>{lang}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Product Status */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Product Status
+              </label>
+              <select
+                value={productStatus}
+                onChange={(e) => setProductStatus(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              >
+                <option value="">Select product status</option>
+                {Object.values(ProductStatus).map(ps => (
+                  <option key={ps} value={ps}>{ps}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Product Type */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Product Type
+              </label>
+              <select
+                value={productType}
+                onChange={(e) => setProductType(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              >
+                <option value="">Select product type</option>
+                {Object.values(ProductType).map(pt => (
+                  <option key={pt} value={pt}>{pt}</option>
+                ))}
               </select>
             </div>
 

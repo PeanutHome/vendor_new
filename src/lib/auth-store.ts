@@ -32,6 +32,8 @@ export interface AuthState {
   checkAuthStatus: () => void;
   updateAccessToken: (newToken: string) => void;
   updateUser: (userData: User) => void;
+  fetchVendorDetails: () => Promise<void>;
+  refreshToken: () => Promise<boolean>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -97,7 +99,6 @@ export const useAuthStore = create<AuthState>()(
           console.log('🎯 Success Response:', responseData);
           console.log('👤 User Data:', responseData.user);
           console.log('🔑 Access Token:', responseData.accessToken);
-          console.log('ℹ️ No refresh token provided - using access token for refresh');
           
           set({
             user: responseData.user,
@@ -109,6 +110,14 @@ export const useAuthStore = create<AuthState>()(
           });
           
           console.log('✅ Auth State Updated Successfully');
+          
+          // Fetch vendor details after successful login
+          const authState = get();
+          if (authState.userId && authState.accessToken) {
+            console.log('🔄 Fetching vendor details after login...');
+            await get().fetchVendorDetails();
+          }
+          
           return true; // Return true to indicate login success
         } catch (error) {
           console.error('❌ LOGIN ERROR:', error);
@@ -207,6 +216,85 @@ export const useAuthStore = create<AuthState>()(
         console.log('🔄 Updating user data');
         set({ user: userData });
       },
+
+      fetchVendorDetails: async () => {
+        const state = get();
+        if (!state.accessToken || !state.userId) {
+          console.log('❌ Cannot fetch vendor details: missing token or user ID');
+          return;
+        }
+
+        try {
+          console.log('🚀 Fetching vendor details for user:', state.userId);
+          const apiUrl = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.VENDOR_BY_USER.replace('{userId}', state.userId)}`;
+          
+          const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${state.accessToken}`,
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const vendorData = await response.json();
+          console.log('✅ Vendor details fetched successfully:', vendorData);
+          
+          set({
+            vendorId: vendorData.id || vendorData.vendorId,
+            vendorDetails: vendorData,
+          });
+          
+          console.log('✅ Vendor ID saved:', vendorData.id || vendorData.vendorId);
+        } catch (error) {
+          console.error('❌ Error fetching vendor details:', error);
+          // Don't throw error, just log it - vendor might not exist yet
+        }
+      },
+
+      refreshToken: async () => {
+        const state = get();
+        if (!state.accessToken) {
+          console.log('❌ Cannot refresh token: no access token available');
+          return false;
+        }
+
+        try {
+          console.log('🔄 Attempting to refresh access token...');
+          
+          const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.REFRESH}`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${state.accessToken}`,
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (!response.ok) {
+            console.log('❌ Token refresh failed with status:', response.status);
+            // If refresh fails, log out the user
+            get().logout();
+            return false;
+          }
+
+          const refreshData = await response.json();
+          console.log('✅ Token refreshed successfully');
+          
+          // Update the access token
+          set({ accessToken: refreshData.accessToken });
+          console.log('✅ New access token saved');
+          
+          return true;
+        } catch (error) {
+          console.error('❌ Error refreshing token:', error);
+          // If refresh fails, log out the user
+          get().logout();
+          return false;
+        }
+      },
     }),
     {
       name: 'auth-storage',
@@ -222,23 +310,4 @@ export const useAuthStore = create<AuthState>()(
   )
 );
 
-// Set up event listeners for token refresh and force logout
-if (typeof window !== 'undefined') {
-  // Listen for token refresh events
-  window.addEventListener('tokenRefreshed', ((event: CustomEvent) => {
-    const { accessToken, user } = event.detail;
-    const authStore = useAuthStore.getState();
-    authStore.updateAccessToken(accessToken);
-    if (user) {
-      authStore.updateUser(user);
-    }
-    console.log('✅ Token refreshed and auth store updated');
-  }) as EventListener);
-
-  // Listen for force logout events
-  window.addEventListener('forceLogout', () => {
-    const authStore = useAuthStore.getState();
-    authStore.logout();
-    console.log('🔄 Force logout executed');
-  });
-} 
+ 

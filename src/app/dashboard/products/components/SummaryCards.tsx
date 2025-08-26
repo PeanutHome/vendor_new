@@ -7,11 +7,15 @@ const totalProducts = mockProducts.length;
 const liveProducts = mockProducts.filter(p => p.status === 'live').length;
 const totalRevenue = mockProducts
   .filter(p => p.status === 'live')
-  .reduce((sum, p) => sum + (parseFloat(p.price.replace('$', '')) * p.sales), 0);
+  .reduce((sum, p) => {
+    const price = parseFloat(p.sellingPrice || '0');
+    const sales = p.sales || 0;
+    return sum + (price * sales);
+  }, 0);
 const avgRating = liveProducts > 0 
-  ? (mockProducts.filter(p => p.status === 'live').reduce((sum, p) => sum + p.rating, 0) / liveProducts).toFixed(1)
+  ? (mockProducts.filter(p => p.status === 'live').reduce((sum, p) => sum + (p.rating || 0), 0) / liveProducts).toFixed(1)
   : '0';
-const lowStockProducts = mockProducts.filter(p => p.status === 'live' && p.stock < 25).length;
+const lowStockProducts = mockProducts.filter(p => p.status === 'live' && (p.stock || 0) < 25).length;
 
 // Essential summary cards only
 const summaryCards: SummaryCardData[] = [
