@@ -9,6 +9,7 @@ import { PRIMARY_GREEN } from "./data/mockData";
 import { Product } from "./data/mockData";
 import { API_CONFIG } from "@/lib/config";
 import { useAuthStore } from "@/lib/auth-store";
+import { apiCallWithRefresh } from "@/lib/utils";
 
 
 
@@ -23,6 +24,18 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Safety mechanism to prevent loading state from getting stuck
+  useEffect(() => {
+    if (loading) {
+      const safetyTimeout = setTimeout(() => {
+        console.log('⚠️ Loading timeout reached, resetting loading state');
+        setLoading(false);
+      }, 30000); // 30 seconds timeout
+
+      return () => clearTimeout(safetyTimeout);
+    }
+  }, [loading]);
 
   // State for dialogs
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -68,7 +81,7 @@ export default function ProductsPage() {
                'Authorization': `Bearer ${accessToken}`,
              };
 
-             const response = await fetch(apiUrl, {
+             const response = await apiCallWithRefresh(apiUrl, {
                method: 'GET',
                headers,
              });
@@ -122,6 +135,7 @@ export default function ProductsPage() {
        setProducts([]);
            } finally {
         setLoading(false);
+        console.log('🔄 Loading state reset to false');
       }
     }, [accessToken, vendorId]);
 

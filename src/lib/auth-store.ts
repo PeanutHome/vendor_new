@@ -266,15 +266,13 @@ export const useAuthStore = create<AuthState>()(
           console.log('🔄 Attempting to refresh access token...');
           console.log('🔑 Current token (first 20 chars):', state.accessToken.substring(0, 20) + '...');
           
-          // Send the expired token in the body instead of header
+          // Send the expired token in Authorization header as Bearer token
           const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.REFRESH}`, {
             method: 'POST',
             headers: {
+              'Authorization': `Bearer ${state.accessToken}`, // Send as Bearer token
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-              accessToken: state.accessToken, // Send expired token in body
-            }),
           });
 
           console.log('📥 Refresh response status:', response.status);

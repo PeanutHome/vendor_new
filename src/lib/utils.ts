@@ -33,16 +33,23 @@ export const apiCallWithRefresh = async (
       if (refreshSuccess) {
         console.log('✅ Token refreshed, retrying original request...');
         
-        // Get the new token and update the Authorization header
+        // Get the new token and create new options with updated headers
         const newToken = useAuthStore.getState().accessToken;
-        if (newToken && options.headers) {
-          const updatedHeaders = new Headers(options.headers);
-          updatedHeaders.set('Authorization', `Bearer ${newToken}`);
-          options.headers = updatedHeaders;
+        if (newToken) {
+          // Create a new options object with the updated Authorization header
+          const newOptions = {
+            ...options,
+            headers: {
+              ...options.headers,
+              'Authorization': `Bearer ${newToken}`
+            }
+          };
+          
+          console.log('🔄 Retrying with new token (first 20 chars):', newToken.substring(0, 20) + '...');
+          
+          // Retry the request with the new token
+          return apiCallWithRefresh(url, newOptions, retryCount + 1);
         }
-        
-        // Retry the request with the new token
-        return apiCallWithRefresh(url, options, retryCount + 1);
       } else {
         console.log('❌ Token refresh failed, user will be logged out');
         // The refresh function already handles logout, so just return the original response
